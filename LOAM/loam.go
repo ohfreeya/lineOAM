@@ -32,15 +32,26 @@ func ReceiveCallBack(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	fmt.Println(cb)
 	for _, event := range cb.Events {
 		switch e := event.(type) {
 		case webhook.MessageEvent:
-			source := e.Source
-			fmt.Println(source)
-			fmt.Printf("%T, %T, %+v", e, e.Source, e.Source)
+			var uId string = getMsgUid(e.Source)
+			fmt.Println("uId: ", uId)
+			SendTextMessage(uId, "test")
 		}
 	}
+}
+
+func getMsgUid(s webhook.SourceInterface) (uid string) {
+	switch source := s.(type) {
+	case webhook.UserSource:
+		uid = source.UserId
+	case webhook.GroupSource:
+		uid = source.GroupId
+	case webhook.RoomSource:
+		uid = source.RoomId
+	}
+	return uid
 }
 
 func SendTextMessage(to string, text string) {
